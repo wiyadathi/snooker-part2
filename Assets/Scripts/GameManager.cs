@@ -15,11 +15,16 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private float xInput;
     [SerializeField] private float force;
+
+    [SerializeField] private GameObject camera;
     
     // Start is called before the first frame update
     void Start()
     {
         instance = this;
+
+        camera = Camera.main.gameObject;
+        CameraBehindBall();
         
         //set balls on the table
         SetBalls(BallColors.White, 0);
@@ -43,6 +48,11 @@ public class GameManager : MonoBehaviour
             ShootBall();
         }
 
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            StopBall();
+        }
+
     }
 
     void SetBalls(BallColors color, int pos)
@@ -62,8 +72,27 @@ public class GameManager : MonoBehaviour
 
     void ShootBall()
     {
+        camera.transform.parent = null;
         Rigidbody rd = cueBall.GetComponent<Rigidbody>();
         rd.AddRelativeForce(Vector3.forward * force, ForceMode.Impulse);
         ballLine.SetActive(false);
+    }
+
+    void CameraBehindBall()
+    {
+        camera.transform.parent = cueBall.transform;
+        camera.transform.position = cueBall.transform.position + new Vector3(0f, 20f, -10f);
+    }
+
+    void StopBall()
+    {
+        Rigidbody rd = cueBall.GetComponent<Rigidbody>();
+        rd.velocity = Vector3.zero;
+        rd.angularVelocity = Vector3.zero;
+        
+        cueBall.transform.eulerAngles = Vector3.zero;
+        CameraBehindBall();
+        camera.transform.eulerAngles = new Vector3(40f, 0f, 0f);
+        ballLine.SetActive(true);
     }
 }
